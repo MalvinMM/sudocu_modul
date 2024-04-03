@@ -23,14 +23,14 @@
                 </div>
                 <div class="mb-3">
                     <label for="Description" class="form-label">Deskripsi Database View</label>
-                    <textarea class="form-control" style="height:100px" id="Description" name="Description">{{ old('Description') }}</textarea>
+                    <textarea class="form-control" id="Description" name="Description" rows="10">{{ old('Description') }}</textarea>
                     @error('Description')
                         <h6 class="form-helper" style="color:red">{{ $message }}</h6>
                     @enderror
                 </div>
                 <div class="mb-3">
                     <label for="SQL_Query" class="form-label">SQL Query</label>
-                    <textarea class="form-control" style="height:100px" id="SQL_Query" name="SQL_Query">{{ old('SQL_Query') }}</textarea>
+                    <textarea class="form-control" id="SQL_Query" name="SQL_Query" rows="10">{{ old('SQL_Query') }}</textarea>
                     @error('SQL_Query')
                         <h6 class="form-helper" style="color:red">{{ $message }}</h6>
                     @enderror

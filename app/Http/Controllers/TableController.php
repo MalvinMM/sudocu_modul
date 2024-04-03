@@ -139,10 +139,19 @@ class TableController extends Controller
 
     public function import(Request $request, $erp)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
-        ]);
 
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'file' => 'required|mimes:xlsx,xls',
+            ]
+        );
+
+        if ($validator->fails()) {
+            // flash('error')->error();
+            session()->flash('danger', 'File Harus Berupa Excel Dengan Format Seperti Template');
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
         $file = $request->file('file');
 
         Excel::import(new ImportTable($erp), $file);

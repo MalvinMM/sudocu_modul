@@ -155,7 +155,7 @@
             document.getElementById('delete-button-{{ $user->UserID }}').addEventListener('click', function(
                 event) {
                 event.preventDefault();
-                if (confirm("Are you sure you want to deactivate this user?")) {
+                if (confirm("Are you sure you want to delete this paket?")) {
                     document.getElementById('deactivateUser-{{ $user->UserID }}').submit();
                 }
             });

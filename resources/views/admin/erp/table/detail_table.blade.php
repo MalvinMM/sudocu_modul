@@ -67,7 +67,7 @@
                                         <h6 class="fw-semibold mb-1">{{ $field->Name }}</h6>
                                     </td>
                                     <td class="border-bottom-0 text-center">
-                                        <textarea id="description_{{ $loop->iteration }}" name="description[]" class="form-control description" rows="3"
+                                        <textarea id="description_{{ $loop->iteration }}" name="description[]" class="form-control description" rows="5"
                                             data-field-id="{{ $field->FieldID }}">{{ $field->Description }}</textarea>
                                     </td>
                                     <td class="border-bottom-0 text-center">

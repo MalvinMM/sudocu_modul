@@ -260,8 +260,12 @@ class ModuleController extends Controller
     public function deleteCategory($erp, $id)
     {
         $module = ModuleCategory::find($id);
-        $module->delete();
-        session()->flash('warning', 'Kategori Berhasil Dihapus.');
+        try {
+            $module->delete();
+            session()->flash('warning', 'Kategori Berhasil Dihapus!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            session()->flash('danger', 'Kategori Tidak Bisa Dihapus. Masih Ada Modul Dengan Kategori ' . $module->Name . '.');
+        }
 
         return redirect()->back();
     }

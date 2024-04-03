@@ -17,14 +17,26 @@ class ImportTable implements ToCollection
     public function __construct($variable)
     {
         $this->variable = ERP::where('Initials', $variable)->value('ERPID');
-        $this->tableRefs = Table::pluck('TableID', 'Name');
-        $this->fieldRefs = DetailTable::pluck('FieldID', 'Name');
+        $this->tableRefs = Table::where('ERPID', $this->variable)->get();
+        $this->fieldRefs = [];
+
+        foreach ($this->tableRefs as $table) {
+            $this->fieldRefs[$table->Name] = $table->fields->pluck('FieldID', 'Name');
+        }
+        $this->tableRefs = $this->tableRefs->pluck('TableID', 'Name');
     }
 
     public function collection(Collection $collection)
     {
         $errors = [];
         $columnNames = $collection->shift()->toArray(); // Remove first row and convert to array
+        $requiredColumns = ['TableName', 'FieldName', 'Nullable', 'DataType'];
+        foreach ($requiredColumns as $columnName) {
+            if (!in_array($columnName, $columnNames)) {
+                session()->flash('danger', 'Import Gagal Dilakukan. Periksa Kembali File Excel.');
+                return back()->withInput();
+            }
+        }
 
         $collection->each(function ($row, $index) use ($columnNames, &$errors) {
 
@@ -69,7 +81,7 @@ class ImportTable implements ToCollection
                     case 'DataType':
                         $fieldData['DataType'] = $row[$index];
                         break;
-                    case 'DefaultValue':
+                    case 'Default Value':
                         $fieldData['DefaultValue'] = $row[$index];
                         break;
                     case 'Table Ref':
@@ -80,26 +92,42 @@ class ImportTable implements ToCollection
                         break;
                 }
             }
-
             $tableID = $this->tableRefs[$tableData['Name']] ?? null;
 
             if (!$tableID) {
                 $tableData['ERPID'] = $this->variable;
-                $checkTable = Table::create($tableData);
-                $this->tableRefs[$checkTable->Name] = $checkTable->TableID;
-                $tableID = $checkTable->TableID;
+                $newTable = Table::create($tableData);
+                $this->tableRefs[$newTable->Name] = $newTable->TableID;
+                $tableID = $newTable->TableID;
+            } else {
+                $checkTable = Table::find($tableID);
+                $checkTable->update([
+                    'Name' => $tableData['Name'],
+                    'Description' => $tableData['Description']
+                ]);
             }
 
             $fieldData['TableID'] = $tableID;
-            $fieldID = $this->fieldRefs[$fieldData['Name']] ?? null;
-            if (!$fieldID) {
-                $checkField = DetailTable::create($fieldData);
-                $this->fieldRefs[$checkField->Name] = $checkField->FieldID;
+            $fieldID = $this->fieldRefs[$tableData['Name']][$fieldData['Name']] ?? null;
+            if ($fieldID) {
+                $checkField = DetailTable::find($fieldID);
+                $checkField->update([
+                    'TableID' => $fieldData['TableID'],
+                    'Name' => $fieldData['Name'],
+                    'Description' => $fieldData['Description'],
+                    'DataType' => $fieldData['DataType'],
+                    'AlowNull' => $fieldData['AllowNull'],
+                    'DefaultValue' => $fieldData['DefaultValue'],
+                    'TableIDRef' => $fieldData['TableIDRef'],
+                    'FieldIDRef' => $fieldData['FieldIDRef'],
+                ]);
+                session()->flash('info', 'Terdapat Beberapa Field Yang Terupdate.');
             } else {
-                DetailTable::create($fieldData);
+                $newField = DetailTable::create($fieldData);
+                $this->fieldRefs[$tableData['Name']][$newField->Name] = $newField->FieldID;
             }
         });
 
-        session()->flash('success', 'File Berhasil Di-import. Tabel Ditambahkan');
+        session()->flash('success', 'File Berhasil Di-import.');
     }
 }

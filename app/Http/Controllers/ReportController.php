@@ -266,9 +266,12 @@ class ReportController extends Controller
     public function deleteCategory($erp, $id)
     {
         $report = ReportCategory::find($id);
-        $report->delete();
-
-        session()->flash('warning', 'Kategori Berhasil Dihapus');
+        try {
+            $report->delete();
+            session()->flash('warning', 'Kategori Berhasil Dihapus!');
+        } catch (\Illuminate\Database\QueryException $e) {
+            session()->flash('danger', 'Kategori Tidak Bisa Dihapus. Masih Ada Report Dengan Kategori ' . $report->Name . '.');
+        }
         return redirect()->back();
     }
 
