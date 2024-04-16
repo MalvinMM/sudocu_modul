@@ -32,9 +32,8 @@ class DBFuncController extends Controller
                 'Name'    => [
                     'required',
                     'max:50',
-                    Rule::unique('db_function')->where(function ($query) use ($request, $erpID) {
-                        return $query->whereRaw('LOWER(Name) = ?', [strtolower($request->Name)])->where('ERPID', $erpID);
-                    })
+                    'unique:db_function,Name,NULL,id,ERPID,' . $erpID,
+
                 ],
                 'Description' => 'required',
                 'SQL_Query' => 'required'

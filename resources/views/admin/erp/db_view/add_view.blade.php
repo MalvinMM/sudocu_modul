@@ -30,7 +30,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="SQL_Query" class="form-label">SQL Query</label>
-                    <textarea class="form-control" id="SQL_Query" name="SQL_Query" rows="10">{{ old('SQL_Query') }}</textarea>
+                    <textarea class="form-control" id="SQL_Query" name="SQL_Query" rows="15">{{ old('SQL_Query') }}</textarea>
                     @error('SQL_Query')
                         <h6 class="form-helper" style="color:red">{{ $message }}</h6>
                     @enderror

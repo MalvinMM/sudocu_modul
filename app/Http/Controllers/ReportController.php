@@ -10,6 +10,7 @@ use App\Models\DetailReport;
 use Illuminate\Http\Request;
 use App\Models\ReportCategory;
 use Illuminate\Validation\Rule;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -41,7 +42,7 @@ class ReportController extends Controller
     public function addCategory($erp)
     {
         $erpID = ERP::where('Initials', $erp)->first()->ERPID;
-        $categories = ReportCategory::where('ERPID', $erpID)->get();
+        $categories = ReportCategory::where('ERPID', $erpID)->paginate(10);
         return view('admin.erp.report.add_category', compact('erp', 'categories'));
     }
 
@@ -95,7 +96,7 @@ class ReportController extends Controller
                 'Category' => 'required',
                 'sequence.*' => 'required|numeric',
                 'Description.*' => 'required',
-                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
             ],
             [
                 'Description.*.required' => 'Deskripsi perlu untuk diisi'
@@ -134,8 +135,10 @@ class ReportController extends Controller
         foreach ($sequences as $index => $sequence) {
             $gambar = null;
             if ($request->file('filePath') and array_key_exists($index, $request->file('filePath'))) {
-                $gambar = Str::random(35) . '.' . $request->filePath[$index]->extension();
-                $request->filePath[$index]->storeAs('public/gambar_sequence', $gambar);
+                $compressedImage = Image::make($request->filePath[$index])->encode('jpg', 75);
+                $gambar = $request->filePath[$index]->store('public/gambar_sequence');
+                Storage::put($gambar, (string) $compressedImage);
+                $gambar = explode("gambar_sequence/", $gambar)[1];
             }
             DetailReport::create([
                 'ReportID' => $report->ReportID,
@@ -184,7 +187,7 @@ class ReportController extends Controller
                 'Category' => 'required',
                 'sequence.*' => 'required',
                 'Description.*' => 'required',
-                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
             ],
             [
                 'Description.*.required' => 'Deskripsi perlu untuk diisi'
@@ -208,9 +211,10 @@ class ReportController extends Controller
                 $detail = $report->details[$i];
                 if ($i < count($request->sequence)) {
                     if ($request->file('filePath') and array_key_exists($i, $request->file('filePath'))) {
-                        $gambar = null;
-                        $gambar = Str::random(35) . '.' . $request->file('filePath')[$i]->extension();
-                        $request->file('filePath')[$i]->storeAs('public/gambar_sequence', $gambar);
+                        $compressedImage = Image::make($request->filePath[$i])->encode('jpg', 75);
+                        $gambar = $request->filePath[$i]->store('public/gambar_sequence');
+                        Storage::put($gambar, (string) $compressedImage);
+                        $gambar = explode("gambar_sequence/", $gambar)[1];
                     } else {
                         $gambar = DetailReport::where('ReportDetailID', $request->detailsID[$i])->first()->FilePath;
                     }
@@ -230,8 +234,10 @@ class ReportController extends Controller
             for ($i = count($report->details); $i < count($request->sequence); $i++) {
                 $gambar = null;
                 if ($request->file('filePath') and array_key_exists($i, $request->file('filePath'))) {
-                    $gambar = Str::random(35) . '.' . $request->file('filePath')[$i]->extension();
-                    $request->file('filePath')[$i]->storeAs('public/gambar_sequence', $gambar);
+                    $compressedImage = Image::make($request->filePath[$i])->encode('jpg', 75);
+                    $gambar = $request->filePath[$i]->store('public/gambar_sequence');
+                    Storage::put($gambar, (string) $compressedImage);
+                    $gambar = explode("gambar_sequence/", $gambar)[1];
                 }
                 DetailReport::create([
                     'ReportID' => $id,

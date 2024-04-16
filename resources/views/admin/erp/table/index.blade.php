@@ -15,12 +15,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
-            @if (session('info'))
-                <div class="mt-3 alert alert-info alert-dismissible fade show" role="alert">
-                    {{ session('info') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
             @if (session('danger'))
                 <div class="mt-3 alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('danger') }}
@@ -35,6 +29,13 @@
             </div>
 
             <div class="row mt-3" style="justify-content: space-between; align-items: flex-end;">
+                <h6 style="color:red">Terms & Condition :
+                    <li>Max Size : 2 MB</li>
+                    <li>File Type : .xlsx atau .xls</li>
+                    <li>Format kolom file harus sesuai template.</li>
+                    <li>Apabila ada field yang sudah ada dalam sistem, maka field akan diupdate sesuai dengan file yang
+                        diimport</li>
+                </h6>
                 <div class="col-md-4"> <!-- Adjust the column width as needed -->
                     <form action="{{ route('import.excel', $erp) }}" method="POST" enctype="multipart/form-data"
                         class="d-flex">
@@ -123,7 +124,11 @@
             </table>
             </form>
         </div>
+        <div class="d-flex justify-content-center mt-3">
+            {{ $tables->appends(request()->query())->links('pagination::bootstrap-4') }}
+        </div>
     </div>
+
     </div>
 @endsection
 

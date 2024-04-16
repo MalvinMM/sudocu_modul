@@ -121,7 +121,6 @@ class ImportTable implements ToCollection
                     'TableIDRef' => $fieldData['TableIDRef'],
                     'FieldIDRef' => $fieldData['FieldIDRef'],
                 ]);
-                session()->flash('info', 'Terdapat Beberapa Field Yang Terupdate.');
             } else {
                 $newField = DetailTable::create($fieldData);
                 $this->fieldRefs[$tableData['Name']][$newField->Name] = $newField->FieldID;

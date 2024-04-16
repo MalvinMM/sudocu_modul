@@ -143,13 +143,13 @@ class TableController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'file' => 'required|mimes:xlsx,xls',
+                'file' => 'file|required|mimes:xlsx,xls|max:2048',
             ]
         );
 
         if ($validator->fails()) {
             // flash('error')->error();
-            session()->flash('danger', 'File Harus Berupa Excel Dengan Format Seperti Template');
+            session()->flash('danger', 'File gagal diimport. Perhatikan kembali syarat.');
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $file = $request->file('file');

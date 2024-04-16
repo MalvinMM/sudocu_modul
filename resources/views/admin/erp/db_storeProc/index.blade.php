@@ -96,6 +96,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-center mt-3">
+                {{ $storeProcs->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </div>
         </div>
     </div>
 @endsection

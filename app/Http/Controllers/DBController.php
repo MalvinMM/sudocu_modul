@@ -35,10 +35,8 @@ class DBController extends Controller
                 'DbName'    => [
                     'required',
                     'max:50',
-                    Rule::unique('m_database')->where(function ($query) use ($request) {
-                        return $query->whereRaw('LOWER(DbName) = ?', [strtolower($request->DbName)])
-                            ->where('ERPID', $request->ERPID);
-                    })
+                    'unique:m_database,DBName,NULL,DBID,ERPID,' . $erpID,
+
                 ],
                 'DbServerLoc' => 'required|max:15',
                 'DbUserName' => 'required|max:15',

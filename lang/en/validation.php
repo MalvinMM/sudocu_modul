@@ -53,7 +53,7 @@ return [
     'enum' => 'The selected :attribute is invalid.',
     'exists' => 'The selected :attribute is invalid.',
     'extensions' => 'The :attribute field must have one of the following extensions: :values.',
-    'file' => 'The :attribute field must be a file.',
+    'file' => ':attribute harus merupakan file.',
     'filled' => 'The :attribute field must have a value.',
     'gt' => [
         'array' => 'The :attribute field must have more than :value items.',
@@ -97,7 +97,7 @@ return [
         'string' => ':attribute perlu memiliki maksimal :max karakter.',
     ],
     'max_digits' => 'The :attribute field must not have more than :max digits.',
-    'mimes' => 'The :attribute field must be a file of type: :values.',
+    'mimes' => ':attribute harus dalam bentuk: :values.',
     'mimetypes' => 'The :attribute field must be a file of type: :values.',
     'min' => [
         'array' => 'The :attribute field must have at least :min items.',
@@ -144,7 +144,7 @@ return [
     'same' => 'The :attribute field must match :other.',
     'size' => [
         'array' => 'The :attribute field must contain :size items.',
-        'file' => 'The :attribute field must be :size kilobytes.',
+        'file' => ':attribute harus memiliki size dibawah :size kilobytes.',
         'numeric' => 'The :attribute field must be :size.',
         'string' => 'The :attribute field must be :size characters.',
     ],
@@ -205,6 +205,7 @@ return [
         'new_psw' => 'Password Baru',
         'new_psw2' => 'Konfirmasi Password Baru',
         'NIK' => 'NIK',
+        'file' => 'File'
     ],
 
 ];

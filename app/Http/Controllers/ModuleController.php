@@ -10,16 +10,19 @@ use App\Models\DetailModule;
 use Illuminate\Http\Request;
 use App\Models\ModuleCategory;
 use Illuminate\Validation\Rule;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ModuleController extends Controller
 {
     public function masterModule($erp)
     {
         $obj = ERP::where('Initials', $erp)->first();
-        $modules = $obj->modules()->paginate(10);;
+        $modules = $obj->modules()->paginate(10);
         if (auth()->user()->Role == 'User') {
             return view('erp.module.index', compact('modules', 'erp'));
         }
@@ -41,7 +44,7 @@ class ModuleController extends Controller
     public function addCategory($erp)
     {
         $erpID = ERP::where('Initials', $erp)->first()->ERPID;
-        $categories = ModuleCategory::where('ERPID', $erpID)->get();
+        $categories = ModuleCategory::where('ERPID', $erpID)->paginate(10);
         return view('admin.erp.module.add_category', compact('erp', 'categories'));
     }
 
@@ -97,7 +100,7 @@ class ModuleController extends Controller
                 'Category' => 'required',
                 'sequence.*' => 'required',
                 'Description.*' => 'required',
-                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
             ],
             [
                 'Description.*.required' => 'Deskripsi perlu untuk diisi'
@@ -108,6 +111,7 @@ class ModuleController extends Controller
             session()->flash('error', 'Update Gagal, Periksa Kembali Form.');
             return redirect()->back()->withErrors($validator)->withInput();
         }
+        // dd($request->file('filePath'));
 
         $module = Module::create([
             'Name' => $request->Name,
@@ -126,8 +130,25 @@ class ModuleController extends Controller
         foreach ($sequences as $index => $sequence) {
             $gambar = null;
             if ($request->file('filePath') and array_key_exists($index, $request->file('filePath'))) {
-                $gambar = Str::random(35) . '.' . $request->filePath[$index]->extension();
-                $request->filePath[$index]->storeAs('public/gambar_sequence', $gambar);
+
+                $compressedImage = Image::make($request->filePath[$index])->encode('jpg', 75);
+                $gambar = $request->filePath[$index]->store('public/gambar_sequence');
+                Storage::put($gambar, (string) $compressedImage);
+                $gambar = explode("gambar_sequence/", $gambar)[1];
+
+                // FAILED ATTEMPT
+                // $gambar = Str::random(35) . '.' . $request->filePath[$index]->extension();
+                // $request->filePath[$index]->storeAs('public/original', $gambar);
+
+                // $compressedImage = Image::make($request->filePath[$index])->encode('jpg', 75);
+                // $compressedImage->storeAs('public/gambar_sequence');
+
+                // Storage::put($path, (string) $compressedImage);
+
+                // $optimizerChain = OptimizerChainFactory::create();
+                // $optimizerChain->optimize('storage/original/' . $gambar, 'storage/gambar_sequence/' . $gambar);
+                // unlink('storage/original/' . $gambar);
+                // Storage::delete('public/original/' . $gambar);
             }
             DetailModule::create([
                 'ModuleID' => $module->ModuleID,
@@ -176,7 +197,7 @@ class ModuleController extends Controller
                 'Category' => 'required',
                 'sequence.*' => 'required',
                 'Description.*' => 'required',
-                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'filePath.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
             ],
             [
                 'Description.*.required' => 'Deskripsi perlu untuk diisi'
@@ -201,9 +222,10 @@ class ModuleController extends Controller
                 $detail = $module->details[$i];
                 if ($i < count($request->sequence)) {
                     if ($request->file('filePath') and array_key_exists($i, $request->file('filePath'))) {
-                        $gambar = null;
-                        $gambar = Str::random(35) . '.' . $request->file('filePath')[$i]->extension();
-                        $request->file('filePath')[$i]->storeAs('public/gambar_sequence', $gambar);
+                        $compressedImage = Image::make($request->filePath[$i])->encode('jpg', 75);
+                        $gambar = $request->filePath[$i]->store('public/gambar_sequence');
+                        Storage::put($gambar, (string) $compressedImage);
+                        $gambar = explode("gambar_sequence/", $gambar)[1];
                     } else {
                         $gambar = DetailModule::where('ModuleDetailID', $request->detailsID[$i])->first()->FilePath;
                     }
@@ -224,8 +246,10 @@ class ModuleController extends Controller
             for ($i = count($module->details); $i < count($request->sequence); $i++) {
                 $gambar = null;
                 if ($request->file('filePath') and array_key_exists($i, $request->file('filePath'))) {
-                    $gambar = Str::random(35) . '.' . $request->file('filePath')[$i]->extension();
-                    $request->file('filePath')[$i]->storeAs('public/gambar_sequence', $gambar);
+                    $compressedImage = Image::make($request->filePath[$i])->encode('jpg', 75);
+                    $gambar = $request->filePath[$i]->store('public/gambar_sequence');
+                    Storage::put($gambar, (string) $compressedImage);
+                    $gambar = explode("gambar_sequence/", $gambar)[1];
                 }
                 DetailModule::create([
                     'ModuleID' => $id,

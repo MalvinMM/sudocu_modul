@@ -31,9 +31,8 @@ class DBStoreProcController extends Controller
                 'Name'    => [
                     'required',
                     'max:50',
-                    Rule::unique('db_storeProc')->where(function ($query) use ($request, $erpID) {
-                        return $query->whereRaw('LOWER(Name) = ?', [strtolower($request->Name)])->where('ERPID', $request->ERPID);
-                    })
+                    'unique:db_storeProc,Name,NULL,id,ERPID,' . $erpID,
+
                 ],
                 'Description' => 'required',
                 'SQL_Query' => 'required'

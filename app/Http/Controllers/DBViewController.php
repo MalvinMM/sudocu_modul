@@ -32,9 +32,7 @@ class DBViewController extends Controller
                 'Name'    => [
                     'required',
                     'max:50',
-                    Rule::unique('db_views')->where(function ($query) use ($request, $erpID) {
-                        return $query->whereRaw('LOWER(Name) = ?', [strtolower($request->Name)])->where('ERPID', $request->ERPID);
-                    })
+                    'unique:db_views,Name,NULL,id,ERPID,' . $erpID,
                 ],
                 'Description' => 'required',
                 'SQL_Query' => 'required'

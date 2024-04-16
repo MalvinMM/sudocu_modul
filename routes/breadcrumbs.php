@@ -126,8 +126,8 @@ Breadcrumbs::for('detailReport', function (BreadcrumbTrail $trail, $erp, $id): v
 });
 
 Breadcrumbs::for('searchReport', function ($trail, $erp): void {
-    $trail->parent('masterModule', $erp);
-    $trail->push('Searched Module', route('searchReport', $erp));
+    $trail->parent('masterReport', $erp);
+    $trail->push('Searched Report', route('searchReport', $erp));
 });
 
 
@@ -230,6 +230,6 @@ Breadcrumbs::for('detailStoreProc', function (BreadcrumbTrail $trail, $erp, $id)
 });
 
 Breadcrumbs::for('searchDBStoreProc', function ($trail, $erp): void {
-    $trail->parent('masterFunction', $erp);
+    $trail->parent('masterStoreProc', $erp);
     $trail->push('Searched DB Store Procedure', route('searchDBStoreProc', $erp));
 });
