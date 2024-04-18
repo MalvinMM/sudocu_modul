@@ -125,7 +125,7 @@
             </form>
         </div>
         <div class="d-flex justify-content-center mt-3">
-            {{ $tables->appends(request()->query())->links('pagination::bootstrap-4') }}
+            {{ $tables->appends(request()->query())->onEachSide(1)->links('pagination::bootstrap-4') }}
         </div>
     </div>
 

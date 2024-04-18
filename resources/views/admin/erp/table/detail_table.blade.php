@@ -44,6 +44,9 @@
                                     <h6 class="fw-semibold mb-0">Nullable</h6>
                                 </th>
                                 <th class="border-bottom-0 text-center">
+                                    <h6 class="fw-semibold mb-0">Data Type</h6>
+                                </th>
+                                <th class="border-bottom-0 text-center">
                                     <h6 class="fw-semibold mb-0">Default Value</h6>
                                 </th>
                                 <th class="border-bottom-0 text-center">
@@ -78,17 +81,20 @@
                                         @endif
                                     </td>
                                     <td class="border-bottom-0 text-center">
+                                        <h6 class="fw-semibold mb-1">{{ $field->DataType }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0 text-center">
                                         @if ($field->DefaultValue)
                                             <h6 class="fw-semibold mb-1">{{ $field->DefaultValue }}</h6>
                                         @else
-                                            <h6 class="fw-semibold mb-1">None</h6>
+                                            <h4 class="fw-semibold mb-1"><strong>-</strong></h4>
                                         @endif
                                     </td>
                                     <td class="border-bottom-0" style="text-align:center">
                                         <select name="tableIDRef[]" class="form-select tableIDRef"
                                             id="tableIDRef_{{ $loop->iteration }}"
                                             data-field-id="{{ $field->FieldIDRef }}">
-                                            <option value="" selected>Select Table</option>
+                                            <option value="" style="font-weight: bold;" selected>Select Table</option>
                                             @foreach ($tables as $table)
                                                 <option value="{{ $table->TableID }}"
                                                     {{ old('tableIDRef.' . $index) == $table->TableID ? 'selected' : ($field->TableIDRef == $table->TableID ? 'selected' : '') }}>

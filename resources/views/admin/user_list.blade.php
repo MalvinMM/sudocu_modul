@@ -143,7 +143,7 @@
                 </table>
             </div>
             <div class="d-flex justify-content-center mt-3">
-                {{ $users->appends(request()->query())->links('pagination::bootstrap-4') }}
+                {{ $users->appends(request()->query())->onEachSide(1)->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>

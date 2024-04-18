@@ -58,22 +58,22 @@ class ImportTable implements ToCollection
 
         // If there are no errors, proceed to create fields
         $collection->each(function ($row, $index) use ($columnNames) {
+            // dd($columnNames);
             $tableData = [];
             $fieldData = [];
-
             foreach ($columnNames as $index => $columnName) {
                 switch ($columnName) {
                     case 'TableName':
-                        $tableData['Name'] = $row[$index];
+                        $tableData['Name'] = (string) $row[$index];
                         break;
                     case 'TableDescription':
-                        $tableData['Description'] = $row[$index];
+                        $tableData['Description'] = (string) $row[$index];
                         break;
                     case 'FieldName':
-                        $fieldData['Name'] = $row[$index];
+                        $fieldData['Name'] = (string) $row[$index];
                         break;
                     case 'FieldDescription':
-                        $fieldData['Description'] = $row[$index];
+                        $fieldData['Description'] = (string) $row[$index];
                         break;
                     case 'Nullable':
                         $fieldData['AllowNull'] = $row[$index] !== 'N';
@@ -82,18 +82,32 @@ class ImportTable implements ToCollection
                         $fieldData['DataType'] = $row[$index];
                         break;
                     case 'Default Value':
+                    case 'DefaultValue':
                         $fieldData['DefaultValue'] = $row[$index];
                         break;
                     case 'Table Ref':
-                        $fieldData['TableIDRef'] = $this->tableRefs[$row[$index]] ?? null;
+                    case 'TableRef':
+                        // dd($row[$index]);
+                        if ($row[$index]) {
+                            $fieldData['TableIDRef'] = $this->tableRefs[$row[$index]] ?? 'none';
+                            $fieldData['TableRefName'] = $row[$index];
+                        } else {
+                            $fieldData['TableIDRef'] = null;
+                        }
                         break;
                     case 'Field Ref':
-                        $fieldData['FieldIDRef'] = $this->fieldRefs[$row[$index]] ?? null;
+                    case 'FieldRef':
+                        if ($row[$index]) {
+                            // dd($fieldData['TableRefName']);
+                            $fieldData['FieldIDRef'] = $this->fieldRefs[$fieldData['TableRefName']][$row[$index]] ?? 'none';
+                            $fieldData['FieldRefName'] = $row[$index];
+                        } else {
+                            $fieldData['FieldIDRef'] = null;
+                        }
                         break;
                 }
             }
             $tableID = $this->tableRefs[$tableData['Name']] ?? null;
-
             if (!$tableID) {
                 $tableData['ERPID'] = $this->variable;
                 $newTable = Table::create($tableData);
@@ -103,7 +117,7 @@ class ImportTable implements ToCollection
                 $checkTable = Table::find($tableID);
                 $checkTable->update([
                     'Name' => $tableData['Name'],
-                    'Description' => $tableData['Description']
+                    'Description' => ($tableData['Description'] == "") ? $checkTable->Description : $tableData['Description']
                 ]);
             }
 
@@ -116,13 +130,41 @@ class ImportTable implements ToCollection
                     'Name' => $fieldData['Name'],
                     'Description' => $fieldData['Description'],
                     'DataType' => $fieldData['DataType'],
-                    'AlowNull' => $fieldData['AllowNull'],
+                    'AllowNull' => $fieldData['AllowNull'],
                     'DefaultValue' => $fieldData['DefaultValue'],
                     'TableIDRef' => $fieldData['TableIDRef'],
                     'FieldIDRef' => $fieldData['FieldIDRef'],
                 ]);
             } else {
-                $newField = DetailTable::create($fieldData);
+                if ($fieldData['TableIDRef'] == 'none') {
+                    $newTable = Table::create([
+                        'Name' => $fieldData['TableRefName'],
+                        'ERPID' => $this->variable
+                    ]);
+                    $fieldData['TableIDRef'] = $newTable->TableID;
+                    $this->tableRefs[$newTable->Name] = $newTable->TableID;
+                }
+                unset($fieldData['TableRefName']);
+
+                if ($fieldData['FieldIDRef'] == 'none') {
+                    $newField = DetailTable::create([
+                        'TableID' => $fieldData['TableIDRef'],
+                        'Name' => $fieldData['FieldRefName'],
+                        'DataType' => 'Integer',
+                        'AllowNull' => false,
+                    ]);
+                }
+                unset($fieldData['FieldRefName']);
+                $newField = DetailTable::create([
+                    'TableID' => $fieldData['TableID'],
+                    'Name' => $fieldData['Name'],
+                    'Description' => $fieldData['Description'],
+                    'DataType' => $fieldData['DataType'],
+                    'AllowNull' => $fieldData['AllowNull'],
+                    'DefaultValue' => $fieldData['DefaultValue'],
+                    'TableIDRef' => $fieldData['TableIDRef'],
+                    'FieldIDRef' => $fieldData['FieldIDRef'],
+                ]);
                 $this->fieldRefs[$tableData['Name']][$newField->Name] = $newField->FieldID;
             }
         });
