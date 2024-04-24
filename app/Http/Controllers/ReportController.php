@@ -21,10 +21,10 @@ class ReportController extends Controller
     public function masterReport($erp)
     {
         // Ambil objek ERP berdasarkan inisial
-        $obj = ERP::where('Initials', $erp)->first();
+        $erp = ERP::where('Initials', $erp)->first();
 
         // Ambil daftar laporan terkait ERP tersebut
-        $reports = $obj->reports()->orderByRaw('LOWER(Name)')->paginate(10);
+        $reports = $erp->reports()->orderByRaw('LOWER(Name)')->paginate(10);
 
         // Jika pengguna adalah User, tampilkan tampilan sesuai dengan peran User
         if (auth()->user()->Role == 'User') {

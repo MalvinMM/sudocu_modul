@@ -21,10 +21,11 @@ class ModuleController extends Controller
     public function masterModule($erp)
     {
         // Mengambil objek ERP berdasarkan inisialnya
-        $obj = ERP::where('Initials', $erp)->first();
+        $erp = ERP::where('Initials', $erp)->first();
 
         // Mengambil modul-modul dari ERP tersebut
-        $modules = $obj->modules()->orderByRaw('LOWER(Name)')->paginate(10);
+        $modules = $erp->modules()->orderByRaw('LOWER(Name)')->paginate(10);
+        $erp = $erp->Initials;
 
         // Jika pengguna adalah 'User', tampilkan tampilan modul biasa
         if (auth()->user()->Role == 'User') {

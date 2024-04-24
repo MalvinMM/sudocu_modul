@@ -19,10 +19,10 @@ class TableController extends Controller
     public function masterTable($erp)
     {
         // Mengambil objek ERP berdasarkan inisialnya
-        $obj = ERP::where('Initials', $erp)->first();
+        $erp = ERP::where('Initials', $erp)->first();
 
         // Mengambil daftar tabel terurut berdasarkan nama dan membaginya ke dalam beberapa halaman
-        $tables = $obj->tables()->orderByRaw('LOWER(Name)')->paginate(10);
+        $tables = $erp->tables()->orderByRaw('LOWER(Name)')->paginate(10);
 
         // Menampilkan halaman index tabel untuk ERP tertentu
         return view('admin.erp.table.index', compact('erp', 'tables'));
