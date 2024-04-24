@@ -23,6 +23,7 @@ class TableController extends Controller
 
         // Mengambil daftar tabel terurut berdasarkan nama dan membaginya ke dalam beberapa halaman
         $tables = $erp->tables()->orderByRaw('LOWER(Name)')->paginate(10);
+        $erp = $erp->Initials;
 
         // Menampilkan halaman index tabel untuk ERP tertentu
         return view('admin.erp.table.index', compact('erp', 'tables'));
