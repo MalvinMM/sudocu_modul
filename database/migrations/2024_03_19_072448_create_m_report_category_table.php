@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('CategoryID');
             $table->unsignedBigInteger('ERPID');
             $table->string('Name', 50);
-            $table->string('token');
 
             $table->unsignedBigInteger('CreateUserID')->nullable();
             $table->dateTime('CreateDateTime')->nullable();

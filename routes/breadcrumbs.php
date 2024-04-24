@@ -1,10 +1,12 @@
 <?php
 
-use App\Models\DBFunction;
-use App\Models\DBStoreProc;
+use App\Models\Database;
+use App\Models\Table;
 use App\Models\DBView;
 use App\Models\Module;
 use App\Models\Report;
+use App\Models\DBFunction;
+use App\Models\DBStoreProc;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
@@ -28,8 +30,8 @@ Breadcrumbs::for('addDB', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('editDB', function (BreadcrumbTrail $trail, $erp, $dbid): void {
     $trail->parent('masterDB', $erp);
-
-    $trail->push('Edit Database ' . $erp, route('editDB', [$erp, $dbid]));
+    $db = Database::find($dbid)->DbName;
+    $trail->push('Edit Database ' . $db, route('editDB', [$erp, $dbid]));
 });
 
 Breadcrumbs::for('searchDB', function ($trail, $erp): void {
@@ -48,7 +50,8 @@ Breadcrumbs::for('masterTable', function ($trail, $erp) {
 Breadcrumbs::for('detailTable', function (BreadcrumbTrail $trail, $erp, $id): void {
 
     $trail->parent('masterTable', $erp);
-    $trail->push('Detail Tabel', route('detailTable', [$erp, $id]));
+    $tabel = Table::find($id)->Name;
+    $trail->push('Tabel ' . $tabel, route('detailTable', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchTable', function ($trail, $erp): void {
@@ -88,13 +91,14 @@ Breadcrumbs::for('addModule', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('editModule', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterModule', $erp);
-    Module::find($id)->first()->Name;
-    $trail->push('Edit Modul ' . Module::find($id)->first()->Name, route('editModule', [$erp, $id]));
+    $modul = Module::find($id)->Name;
+    $trail->push('Edit Modul ' . $modul, route('editModule', [$erp, $id]));
 });
 
 Breadcrumbs::for('detailModule', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterModule', $erp);
-    $trail->push('Modul ' . Module::find($id)->first()->Name, route('detailModule', [$erp, $id]));
+    $modul = Module::find($id)->Name;
+    $trail->push('Modul ' . $modul, route('detailModule', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchModule', function ($trail, $erp): void {
@@ -116,13 +120,12 @@ Breadcrumbs::for('addReport', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('editReport', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterReport', $erp);
-    Report::find($id)->first()->Name;
-    $trail->push('Edit Report ' . Report::find($id)->first()->Name, route('editReport', [$erp, $id]));
+    $trail->push('Edit Report ' . Report::find($id)->Name, route('editReport', [$erp, $id]));
 });
 
 Breadcrumbs::for('detailReport', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterReport', $erp);
-    $trail->push('Report ' . Report::find($id)->first()->Name, route('detailReport', [$erp, $id]));
+    $trail->push('Report ' . Report::find($id)->Name, route('detailReport', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchReport', function ($trail, $erp): void {
@@ -181,7 +184,7 @@ Breadcrumbs::for('addView', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('detailView', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterView', $erp);
-    $trail->push('Database View ' . DBView::find($id)->first()->Name, route('detailView', [$erp, $id]));
+    $trail->push('Database View ' . DBView::find($id)->Name, route('detailView', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchDBView', function ($trail, $erp): void {
@@ -203,7 +206,7 @@ Breadcrumbs::for('addFunction', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('detailFunction', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterFunction', $erp);
-    $trail->push('Database Function ' . DBFunction::find($id)->first()->Name, route('detailFunction', [$erp, $id]));
+    $trail->push('Database Function ' . DBFunction::find($id)->Name, route('detailFunction', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchDBFunction', function ($trail, $erp): void {
@@ -226,7 +229,7 @@ Breadcrumbs::for('addStoreProc', function (BreadcrumbTrail $trail, $erp): void {
 
 Breadcrumbs::for('detailStoreProc', function (BreadcrumbTrail $trail, $erp, $id): void {
     $trail->parent('masterStoreProc', $erp);
-    $trail->push('Database Store Procedure ' . DBStoreProc::find($id)->first()->Name, route('detailStoreProc', [$erp, $id]));
+    $trail->push('Database Store Procedure ' . DBStoreProc::find($id)->Name, route('detailStoreProc', [$erp, $id]));
 });
 
 Breadcrumbs::for('searchDBStoreProc', function ($trail, $erp): void {

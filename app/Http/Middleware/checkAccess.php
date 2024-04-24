@@ -17,8 +17,10 @@ class checkAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Ambil ERP
         $erp = ERP::where('Initials', $request->route('erp'))->first();
-        // dd(UserERP::where('ERPID', 1)->first());
+
+        // Cek user punya relasi dengan ERP tersebut atau tidak.
         if ((UserERP::where([
             ['UserID', auth()->user()->UserID],
             ['ERPID', $erp->ERPID]

@@ -17,8 +17,9 @@ class checkPIC
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Cek apakah user seorang PIC
         $erp = ERP::where('Initials', $request->route('erp'))->first();
-        // dd(UserERP::where('ERPID', 1)->first());
+
         if (auth()->user()->Role != 'User') {
             return $next($request);
         } else {

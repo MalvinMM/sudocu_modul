@@ -4,7 +4,7 @@
     <h3 class="nav-link">Master Database {{ $erp }}</h3>
 @endsection
 @section('content')
-    <h5>{{ Breadcrumbs::render('searchDB', $erp) }}</h5>
+    <h5>{{ Breadcrumbs::render() }}</h5>
 
     <div class="card">
         <div class="card-body p-4">

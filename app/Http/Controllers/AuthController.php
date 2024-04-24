@@ -21,14 +21,18 @@ class AuthController extends Controller
     //     return view('welcome');
     // }
 
-    public function dashboard()
+    public function dashboard() // Menampilkan dashboard (admin maupun user)
     {
-        $users = User::where('isActive', 1)->take(5)->get();
+        // ambil 5 user (alphabetical order) untuk ditampilkan di dashboard.
+        $users = User::where('isActive', 1)->orderByRaw('LOWER(UserName)')->take(5)->get();
         $erps = ERP::all();
+
         for ($i = 0; $i < session()->get('detailCount'); $i++) {
             session()->forget('detail_' . $i);
         }
-        session()->forget('detailCount');
+
+        session()->forget('detailCount'); // session variabel untuk keperluan mmodul & report. Reset variabel.
+
         if (Auth::user()->Role == 'Admin') {
             return view('admin.dashboard', compact(['users', 'erps']));
         } else {
@@ -36,16 +40,18 @@ class AuthController extends Controller
         }
     }
 
-    public function register()
+    public function register() // Show add user page
     {
         $erps = ERP::all();
 
-        $roles = collect(['User', 'PIC', 'Admin']);
+        $roles = collect(['User', 'PIC', 'Admin']); // Untuk keperluan dropdown
 
         return view("admin.register", compact(['roles', 'erps']));
     }
-    public function store(Request $request)
+
+    public function store(Request $request) // Store user
     {
+        // Validasi request
         $validator = Validator::make(
             $request->all(),
             [
@@ -71,6 +77,8 @@ class AuthController extends Controller
             return redirect()->back()->withInput();
         }
         // dd($request->Role);
+
+        // Insert user ke DB.
         $user = User::create([
             'FullName' => $request->FullName,
             'NIK' => $request->NIK,
@@ -83,6 +91,7 @@ class AuthController extends Controller
             'UpdateDateTime' => Carbon::now('GMT+7')
         ]);
 
+        // Untuk user & PIC. setiap ERP yang dipilih, insert ke tabel relasi di DB.
         if ($request->erps) {
             $data = [];
             foreach ($request->erps as $task) {
@@ -103,17 +112,19 @@ class AuthController extends Controller
         return redirect()->route('userList');
     }
 
-    public function editUser($id)
+    public function editUser($id) // Show edit page
     {
+
         $user = User::find($id);
         $erps = ERP::all();
-        $roles = collect(['User', 'PIC', 'Admin']);
+        $roles = collect(['User', 'PIC', 'Admin']); // Untuk keperluan dropdown
 
         return view('admin.edit_user', compact(['user', 'roles', 'erps']));
     }
 
-    public function updateUser(Request $request, $id)
+    public function updateUser(Request $request, $id) // Update user
     {
+        // validasi request (NIK unik, username unik)
         $validator = Validator::make(
             $request->all(),
             [
@@ -128,12 +139,14 @@ class AuthController extends Controller
                 'NIK.unique' => 'NIK ini sudah memiliki akun',
             ]
         );
+
         if ($validator->fails()) {
             // flash('error')->error();
             session()->flash('error', 'Update Gagal.');
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Cek syarat password
         $user = User::find($id);
         if (!$request->password) {
             $password = $user->password;
@@ -150,7 +163,8 @@ class AuthController extends Controller
                 ]);
             }
         }
-        // dd($request->Role);
+
+        // Update user (dengan password yang sudah lolos syarat)
         $user->update([
             'FullName' => $request->FullName,
             'NIK' => $request->NIK,
@@ -161,8 +175,10 @@ class AuthController extends Controller
             'UpdateUserID' => auth()->user()->UserID,
             'UpdateDateTime' => Carbon::now('GMT+7')
         ]);
+
+        // Untuk user & PIC. setiap ERP yang dipilih, update ke tabel relasi di DB.
         if ($request->erps) {
-            $user->erps()->detach();
+            $user->erps()->detach(); // Detach semua relasi ERP untuk user ini.
             $data = [];
             foreach ($request->erps as $task) {
                 $isi = [
@@ -175,15 +191,14 @@ class AuthController extends Controller
                 ];
                 array_push($data, $isi);
             }
-            $user->erps()->attach($data);
-
-            // UserERP::insert($data);
+            $user->erps()->attach($data); // Attach relasi ERP baru.
         }
+
         session()->flash('success', 'User ' . $user->FulName . ' Telah Diupdate.');
         return redirect()->route('userList');
     }
 
-    public function deactivateUser($id)
+    public function deactivateUser($id) // Update kolom isActive user
     {
         $obj = User::find($id);
         $obj->update([
@@ -194,7 +209,7 @@ class AuthController extends Controller
         return redirect()->back();
     }
 
-    public function activateUser($id)
+    public function activateUser($id) // Update kolom isActive user
     {
         $obj = User::find($id);
         $obj->update([
@@ -205,13 +220,14 @@ class AuthController extends Controller
         return redirect()->back();
     }
 
-    public function index()
+    public function index() // Show login page
     {
         return view('login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request) // Login procedure
     {
+        // Validasi input
         $validator = Validator::make(
             $request->all(),
             [
@@ -225,7 +241,8 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only('UserName', 'password');
-        // return redirect()->route('dashboard', [User::where('UserName', $request->UserName)->first()->UserID]);
+
+        // Login attempt
         if (Auth::attempt($credentials) and auth()->user()->isActive == true) {
             $request->session()->regenerate();
             return redirect()->route('dashboard');
@@ -251,7 +268,7 @@ class AuthController extends Controller
         return view('psw_change', compact('id'));
     }
 
-    public function pswChange(Request $request, $id)
+    public function pswChange(Request $request, $id) // Prosedur ubah password
     {
         // dd(Hash::check('user1', auth()->user()->password));
 
@@ -260,6 +277,7 @@ class AuthController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
+                //check password sama atau tidak dengan password yang sekarang
                 'old_psw' => ['required', function ($attribute, $value, $fail) use ($user) {
                     if (!Hash::check($value, $user->password)) {
                         $fail('Password lama tidak sesuai.');
@@ -281,7 +299,79 @@ class AuthController extends Controller
 
         session()->flash('success_psw', 'Password telah berhasil diubah.');
         return redirect()->route('dashboard');
-        // $validator = Validator::make(
+    }
+
+    public function userList() // Show user page
+    {
+        $users = User::where('isActive', true)->orderBy('isActive', 'desc')->paginate(10);
+        session()->forget('search');
+        Session::put('status', 'active');
+        $status = 'active';
+        // dd($users);
+
+        return view('admin.user_list', compact('users', 'status'));
+    }
+
+    public function search(Request $request) // Cari user
+    {
+        $search = $request->input('search');
+
+        $status = session('status'); // Cek status yang difilter
+
+        $users = User::orderBy('isActive', 'desc');
+
+        if ($status === 'active') {
+            $users = User::where('isActive', true);
+        } elseif ($status === 'inactive') {
+            $users = User::where('isActive', false);
+        }
+
+        $users = $users->where('FullName', 'like', '%' . $search . '%')->paginate(10)->appends(['search' => $search]);
+
+        session(['search' => $search]);
+
+        return view('admin.user_list', compact(['users', 'status', 'search']));
+    }
+
+    public function filter(Request $request) // Filter status aktif (get/post)
+    {
+        $status = $request->input('status');
+
+        $search = session('search'); // Cek keyword yang dicari
+
+        $users = User::orderBy('isActive', 'desc');
+
+        if (!empty($search)) {
+            $users->where('FullName', 'like', '%' . $search . '%');
+        }
+
+        if ($status === 'active') {
+            $users->where('isActive', true);
+        } elseif ($status === 'inactive') {
+            $users->where('isActive', false);
+        }
+
+        $users = $users->paginate(10);
+
+        session(['status' => $status]);
+
+        if ($request->isMethod('post')) {
+            $users->appends(['status' => $status]);
+        }
+
+        return view('admin.user_list', compact('users', 'status'));
+    }
+}
+
+
+
+
+
+
+
+// --------------------------------- DUMP ---------------------------------
+// Change password.
+// $validator = Validator::make(
         //     $request->all(),
         //     [
         //         'old_psw'    => 'required',
@@ -312,64 +402,3 @@ class AuthController extends Controller
         //     session()->flash('danger', 'Pengubahan Password Gagal.');
         //     return redirect()->back()->withErrors(['old_psw' => 'Password lama tidak sesuai']);
         // }
-    }
-
-    public function userList()
-    {
-        $users = User::where('isActive', true)->orderBy('isActive', 'desc')->paginate(5);
-        session()->forget('search');
-        Session::put('status', 'active');
-        $status = 'active';
-        // dd($users);
-
-        return view('admin.user_list', compact('users', 'status'));
-    }
-
-    public function search(Request $request)
-    {
-        $search = $request->input('search');
-
-        $status = session('status');
-
-        $users = User::orderBy('isActive', 'desc');
-
-        if ($status === 'active') {
-            $users = User::where('isActive', true);
-        } elseif ($status === 'inactive') {
-            $users = User::where('isActive', false);
-        }
-
-        $users = $users->where('FullName', 'like', '%' . $search . '%')->paginate(5)->appends(['search' => $search]);
-
-        session(['search' => $search]);
-
-        return view('admin.user_list', compact(['users', 'status', 'search']));
-    }
-
-    public function filter(Request $request)
-    {
-        $status = $request->input('status');
-        $search = session('search');
-        $users = User::orderBy('isActive', 'desc');
-
-        if (!empty($search)) {
-            $users->where('FullName', 'like', '%' . $search . '%');
-        }
-
-        if ($status === 'active') {
-            $users->where('isActive', true);
-        } elseif ($status === 'inactive') {
-            $users->where('isActive', false);
-        }
-
-        $users = $users->paginate(5);
-
-        session(['status' => $status]);
-
-        if ($request->isMethod('post')) {
-            $users->appends(['status' => $status]);
-        }
-
-        return view('admin.user_list', compact('users', 'status'));
-    }
-}

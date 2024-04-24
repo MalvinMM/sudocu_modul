@@ -16,6 +16,7 @@ class isAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Cek apakah user adalah admin.
         if (Auth::user()->Role == 'Admin') {
             return $next($request);
         } else {

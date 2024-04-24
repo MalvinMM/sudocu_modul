@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call(UserSeeder::class);
         $this->call(ERPSeeder::class);
-        $this->call(DBSeeder::class);
-        $this->call(TableSeeder::class);
-        $this->call(FieldSeeder::class);
-        $this->call(CategorySeeder::class);
+        // $this->call(DBSeeder::class);
+        // $this->call(TableSeeder::class);
+        // $this->call(FieldSeeder::class);
+        // $this->call(CategorySeeder::class);
     }
 }
