@@ -78,10 +78,6 @@ class ImportTable implements ToCollection
             // }
         });
 
-        // Ambil nama-nama tabel dan field yang unique saja, agar tidak terjadi duplikasi tabel saat insert.
-        $tableRefs = array_unique($tableRefs);
-        $fieldRefs = array_unique($fieldRefs);
-
         // Buat nama-nama field yang ada jadi satu array (tidak terpisah dengan tabel lagi dan tidak menjadi key melainkan value).
         $currentFields = collect($this->fieldRefs)->map(function ($collection) {
             return $collection->keys()->all();
@@ -91,6 +87,7 @@ class ImportTable implements ToCollection
         foreach ($tableRefs as $index => $value) {
 
             // Kalau cuma ada tableRefs, tidak ada fieldRefs --> Error --> Kemungkinan kesalahan penulisan excel.
+            // dd($fieldRefs, $tableRefs);
             if ($fieldRefs[$index] == null) {
                 session()->flash('danger', 'Import Gagal Dilakukan. Cek kembali kolom Table dan Field Refs. Keyword : ' . $value);
                 return back()->withInput();
@@ -103,7 +100,6 @@ class ImportTable implements ToCollection
                     'Name' => $value,
                     'Description' => null
                 ]);
-                $this->tableRefs[$newTable->Name] = $newTable->TableID;
             } else {
                 $newTable = Table::find($this->tableRefs[$value]);
                 $newTable->update([
@@ -111,10 +107,13 @@ class ImportTable implements ToCollection
                     'Description' => null
                 ]);
             }
+            $this->tableRefs[$newTable->Name] = $newTable->TableID;
             $tableID = $newTable->TableID;
 
+            // dd($tableRefs);
             // Checking nama field sudah ada atau belum. Kalau sudah ada -> Update, kalau belum -> Insert.
-            if (in_array($fieldRefs[$index], $currentFields)) {
+            if (in_array($fieldRefs[$index], $currentFields) && in_array($value, array_unique(array_keys($this->fieldRefs)))) {
+
                 $newField = DetailTable::find($this->fieldRefs[$value][$fieldRefs[$index]]);
                 $newField->update([
                     'Name' => $fieldRefs[$index],
@@ -136,6 +135,7 @@ class ImportTable implements ToCollection
                     'TableIDRef' => null,
                     'FieldIDRef' => null
                 ]);
+                $currentFields[] = $newField->Name;
             }
             $this->fieldRefs[$value][$newField->Name] = $newField->FieldID;
         }
@@ -205,7 +205,7 @@ class ImportTable implements ToCollection
             $fieldID = $this->fieldRefs[$tableData['Name']][$fieldData['Name']] ?? null;
             $fieldData['TableID'] = $tableID;
 
-            if ($fieldID) {
+            if ($fieldID !== null) {
                 $checkField = DetailTable::find($fieldID);
                 $checkField->update([
                     'TableID' => $fieldData['TableID'],
