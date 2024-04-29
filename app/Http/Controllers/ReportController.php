@@ -27,6 +27,7 @@ class ReportController extends Controller
         $reports = $erp->reports()->orderByRaw('LOWER(Name)')->paginate(10);
 
         // Jika pengguna adalah User, tampilkan tampilan sesuai dengan peran User
+        $erp = $erp->Initials;
         if (auth()->user()->Role == 'User') {
             return view('erp.report.index', compact('reports', 'erp'));
         }
@@ -36,7 +37,6 @@ class ReportController extends Controller
             session()->forget('detail_' . $i);
         }
         session()->forget('detailCount');
-
         // Tampilkan tampilan sesuai dengan peran Admin
         return view('admin.erp.report.index', compact('reports', 'erp'));
     }
@@ -372,15 +372,15 @@ class ReportController extends Controller
     }
 
     // Mendapatkan data report melalui API menggunakan token yang dimaksud.
-    public function apiData($erp, $token, $name, $category)
+    public function apiData($erp, $token)
     {
         $erpid = ERP::where('Initials', $erp)->first()->ERPID;
         // Temukan report berdasarkan nama dan kategori
-        $report = Report::where('token_report', $token)->where('ERPID', $erpid)->where('Name', $name)->first();
+        $report = Report::where('token_report', $token)->first();
 
         // Jika report tidak ditemukan, kembalikan ke halaman sebelumnya dengan pesan
         if (!$report) {
-            session()->flash('alert', 'Kategori Tidak Bisa Dihapus. Masih Ada Report Dengan Kategori ' . $name . '.');
+            session()->flash('alert', 'Report Tidak Ditemukan.');
             return redirect()->back()->with('alert', 'Report Tidak Ditemukan!');
         }
 

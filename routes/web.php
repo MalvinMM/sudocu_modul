@@ -22,7 +22,7 @@ use App\Http\Controllers\ReportController;
 |
 */
 //DISPLAYING REPORT WITH TOKEN FROM ANOTHER APP
-Route::get('/report/{erp}/{token}/{name}/{category}', [ReportController::class, 'apiData'])->name('reportData');
+Route::get('/report/{erp}/{token}', [ReportController::class, 'apiData']);
 
 Route::controller(AuthController::class)->group(function () {
 
